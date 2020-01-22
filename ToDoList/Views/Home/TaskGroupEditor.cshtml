@@ -1,0 +1,112 @@
+﻿@model TaskGroup
+@{
+    TaskGroup group = Model;
+    ViewData["Title"] = "TaskGroupEditor";
+}
+
+<h1>@group.Name</h1>
+
+
+<div class="grid-container">
+    <div class="top-bar">
+        <form asp-area=""
+              asp-controller="Home"
+              asp-action="SaveGroupName"
+              asp-route-groupId="@group.Id">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group" hidden="hidden">
+                <label asp-for="Id" class="control-label"></label>
+                <input asp-for="Id" class="form-control" />
+                <span asp-validation-for="Id" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group" hidden="hidden">
+                <label asp-for="UserTasks" class="control-label"></label>
+                <input asp-for="UserTasks" class="form-control" />
+                <span asp-validation-for="UserTasks" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+        <a type="button" 
+           asp-area="" 
+           asp-controller="Home" 
+           asp-action="Index" 
+           class="btn btn-primary">
+        Back To List
+        </a>
+    </div>
+    <div class="left-column">
+        <h3>Tasks</h3>
+        <table id="tasks" 
+               class="table table-striped table-bordered  table-hover" 
+               style="width:100%">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th />
+                </tr>
+            </thead>
+            <tbody>
+                @if (group.UserTasks != null)
+                {
+                    @foreach (var task in group.UserTasks)
+                    {
+                        <tr onclick="updateForm(@task.Id)">
+                            <td>
+                                <a>@task.Name</a>
+                            </td>
+                            <td>
+                                <a type="button"
+                                   asp-area=""
+                                   asp-controller="Home"
+                                   asp-action="RemoveTask"
+                                   asp-route-id="@task.Id"
+                                   asp-route-groupId="@group.Id"
+                                   class="btn btn-primary">
+                                    Remove
+                                </a>
+                            </td>
+                        </tr>
+                    }
+
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="right-column">
+        <div id="dynamicContentContainer"></div>
+    </div>
+</div>
+
+
+@section Scripts{
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#tasks').DataTable({
+                "paging": false,
+                "info": false,
+                "searching": false
+            });
+        });
+    </script>
+
+    <script type="text/javascript">
+        updateForm(-1);
+
+        function updateForm(editedId) {
+            $.get('@Url.Action("TaskEditor", "Home")', { id: editedId, groupId: @group.Id }, function (content) {
+                $("#dynamicContentContainer").html(content);
+            });
+        }
+    </script>
+}
+
